@@ -8,18 +8,16 @@
 
 "use strict";  // Operate in Strict mode such that variables must be declared before used!
 
-var gEngine = gEngine || {};
+var gEngine = gEngine || { };
 
 gEngine.GameLoop = (function () {
     var kFPS = 60;          // Frames per second
     var kMPF = 1000 / kFPS; // Milliseconds per frame.
 
     // Variables for timing gameloop.
-    var mPreviousTime = Date.now();
+    var mPreviousTime = performance.now();
     var mLagTime;
-    var mUpdateCalls = 0;
-    var mElapsedTime;
-    
+    var updateCalls = 0;
 
 
     // The current loop state (running or should stop)
@@ -31,30 +29,26 @@ gEngine.GameLoop = (function () {
     var _runLoop = function () {
         if (mIsLoopRunning) {
             // Step A: set up for next call to _runLoop and update input!
-            requestAnimationFrame(function () {
-                _runLoop.call(mMyGame);
-            });
+            requestAnimationFrame(function () { _runLoop.call(mMyGame); });
 
             // Step B: compute how much time has elapsed since we last RunLoop was executed
-            var currentTime = Date.now();
-            mElapsedTime = currentTime - mPreviousTime;
+            var currentTime = performance.now();
+            var elapsedTime = currentTime - mPreviousTime;
             mPreviousTime = currentTime;
-            mLagTime += mElapsedTime;
-
+            mLagTime += elapsedTime;
             // Step C: Make sure we update the game the appropriate number of times.
             //      Update only every Milliseconds per frame.
             //      If lag larger then update frames, update until caught up.
-
-            //console.log(mLagTime);
             while ((mLagTime >= kMPF) && mIsLoopRunning) {
                 gEngine.Input.update();
                 this.update();
-                mUpdateCalls++;
+                updateCalls++;// call MyGame.update()
                 mLagTime -= kMPF;
+                //mLagTime = currentTime - (elapsedTime % kMPF);
+                gUpdateFrame(elapsedTime, updateCalls, mLagTime);
             }
-            //console.log("update calls before draw: " + updateCalls);
-            //gUpdateFrame(elapsedTime, updateCalls, mLagTime);
-            mUpdateCalls = 0;
+            //console.log(updateCalls);
+            updateCalls = 0;
 
             // Step D: now let's draw
             this.draw();    // Call MyGame.draw()
@@ -66,16 +60,14 @@ gEngine.GameLoop = (function () {
         mMyGame = myGame;
 
         // Step A: reset frame time 
-        mPreviousTime = Date.now();
+        mPreviousTime = performance.now();
         mLagTime = 0.0;
 
         // Step B: remember that loop is now running
         mIsLoopRunning = true;
 
         // Step C: request _runLoop to start when loading is done
-        requestAnimationFrame(function () {
-            _runLoop.call(mMyGame);
-        });
+        requestAnimationFrame(function () { _runLoop.call(mMyGame); });
     };
 
     // No Stop or Pause function, as all input are pull during the loop
