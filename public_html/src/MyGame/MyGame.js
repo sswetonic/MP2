@@ -70,6 +70,9 @@ MyGame.prototype.draw = function () {
 // anything from this function!
 MyGame.prototype.update = function () {
     // For this very simple game, let's move the white square and pulse the red
+    
+    gUpdateFrame(gEngine.GameLoop.mElapsedTime, gEngine.GameLoop.mUpdateCalls, gEngine.GameLoop.mLagTime);
+    
     var deltaX = 0.5;
     var redXform = this.mRedSq.getXform();
     // Step A: test for white square movement

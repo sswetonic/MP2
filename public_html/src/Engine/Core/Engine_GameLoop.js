@@ -17,6 +17,9 @@ gEngine.GameLoop = (function () {
     // Variables for timing gameloop.
     var mPreviousTime = Date.now();
     var mLagTime;
+    var mUpdateCalls = 0;
+    var mElapsedTime;
+    
 
 
     // The current loop state (running or should stop)
@@ -34,9 +37,9 @@ gEngine.GameLoop = (function () {
 
             // Step B: compute how much time has elapsed since we last RunLoop was executed
             var currentTime = Date.now();
-            var elapsedTime = currentTime - mPreviousTime;
+            mElapsedTime = currentTime - mPreviousTime;
             mPreviousTime = currentTime;
-            mLagTime += elapsedTime;
+            mLagTime += mElapsedTime;
 
             // Step C: Make sure we update the game the appropriate number of times.
             //      Update only every Milliseconds per frame.
@@ -44,14 +47,14 @@ gEngine.GameLoop = (function () {
 
             //console.log(mLagTime);
             while ((mLagTime >= kMPF) && mIsLoopRunning) {
-                var updateCalls = 0;
                 gEngine.Input.update();
                 this.update();
-                updateCalls++;
+                mUpdateCalls++;
                 mLagTime -= kMPF;
             }
             //console.log("update calls before draw: " + updateCalls);
-            updateCalls = 0;
+            //gUpdateFrame(elapsedTime, updateCalls, mLagTime);
+            mUpdateCalls = 0;
 
             // Step D: now let's draw
             this.draw();    // Call MyGame.draw()
